@@ -15,7 +15,7 @@ import uvicorn
 # ==========================================
 # ⚙️ НАСТРОЙКИ (Берем данные из переменных окружения Render)
 # ==========================================
-BOT_TOKEN = 8745402475:AAEtCvZf1IxIjW3Z5usFfeXrylanqyXres8
+BOT_TOKEN = "8745402475:AAEtCvZf1IxIjW3Z5usFfeXrylanqyXres8"
 WEBAPP_URL = os.getenv("WEBAPP_URL", "https://your-app.onrender.com")
 
 bot = Bot(token=BOT_TOKEN)
