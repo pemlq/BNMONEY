@@ -50,7 +50,7 @@ def verify_telegram_data(init_data: str) -> dict:
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Ошибка авторизации: {str(e)}")
 
-@dp.message(Command("start"))
+@dp.message(CommandStart)
 async def cmd_start(message: Message, command: CommandObject = None):
     user_id = message.from_user.id
     username = message.from_user.username or message.from_user.first_name
