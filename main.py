@@ -50,12 +50,28 @@ def verify_telegram_data(init_data: str) -> dict:
     except Exception as e:
         raise HTTPException(status_code=401, detail=f"Ошибка авторизации: {str(e)}")
 
-@dp.message(CommandStart())
-async def cmd_start(message: types.Message, command: CommandObject):
+@dp.message(Command("start"))
+async def cmd_start(message: Message, command: CommandObject = None):
     user_id = message.from_user.id
-    username = message.from_user.username or f"id{user_id}"
-    first_name = message.from_user.first_name or "Пользователь"
+    username = message.from_user.username or message.from_user.first_name
+    bot_info = await bot.get_me()
+    
+    # Формируем уникальную реферальную ссылку пользователя
+    ref_link = f"https://t.me/{bot_info.username}?start=ref_{user_id}"
 
+    # Создаем кнопку WebApp
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🚀 ОТКРЫТЬ ЛИЧНЫЙ КАБИНЕТ", web_app=WebAppInfo(url=WEBAPP_URL))]
+    ])
+
+    text = (
+        f"👋 <b>Добро пожаловать в BNMONEY, {message.from_user.first_name}!</b>\n\n"
+        f"🔗 <b>Ваша реферальная ссылка:</b>\n<code>{ref_link}</code>\n\n"
+        f"Делитесь этой ссылкой с друзьями и получайте бонусы за их регистрацию!"
+    )
+
+    await message.answer(text, reply_markup=keyboard, parse_mode="HTML")
+    
     referrer_username = None
     if command.args and command.args.startswith("ref_"):
         referrer_username = command.args.replace("ref_", "")
