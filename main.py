@@ -180,28 +180,4 @@ async def on_startup():
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port)
-
-# --- Сохранение криптокошелька из WebApp ---
-class WalletRequest(BaseModel):
-    user_id: int
-    wallet: str
-
-@app.post("/api/wallet/save")
-async def save_wallet(data: WalletRequest):
-    user_id = data.user_id
-    wallet = data.wallet
-
-    if user_id in USERS_DB:
-        USERS_DB[user_id]["wallet"] = wallet
-    else:
-        USERS_DB[user_id] = {
-            "username": "unknown",
-            "first_name": "User",
-            "referrer_id": None,
-            "referrals": [],
-            "subscriptions": [],
-            "wallet": wallet
-        }
-        
-    print(f"✅ Сохранен кошелек для ID {user_id}: {wallet}")
-    return {"success": True, "wallet": wallet}
+    
